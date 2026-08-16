@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Crop Disease Detector</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}" />
+  </head>
+  <body>
+    <div class="app-shell">
+      <header class="topbar">
+        <div>
+          <p class="eyebrow">Smart farming assistant</p>
+          <h1>Maize & Cassava Disease Detector</h1>
+        </div>
+      </header>
+
+      <main class="container">
+        <section class="panel upload-panel">
+          <div class="field-group">
+            <label for="crop">Crop type</label>
+            <select id="crop">
+              <option value="cassava">Cassava</option>
+              <option value="maize">Maize</option>
+            </select>
+          </div>
+
+          <label class="upload-box" for="imageInput">
+            <input id="imageInput" type="file" accept="image/*" />
+            <span id="uploadText">Choose an image or drag it here</span>
+          </label>
+
+          <div class="preview-wrap" id="previewWrap" hidden>
+            <img id="previewImage" alt="Selected leaf preview" />
+          </div>
+
+          <div class="actions">
+            <button id="analyzeBtn" class="primary-btn" type="button">Analyze disease</button>
+            <button id="resetBtn" class="secondary-btn" type="button">Reset</button>
+          </div>
+        </section>
+
+        <section class="panel result-panel">
+          <div id="statusBox" class="status-box idle">Waiting for image upload...</div>
+
+          <div id="resultCard" class="result-card hidden">
+            <div class="result-header">
+              <span id="labelBadge" class="badge">Prediction</span>
+              <span id="confidenceText" class="confidence">0%</span>
+            </div>
+
+            <div class="progress-bar">
+              <div id="confidenceBar" class="progress-fill"></div>
+            </div>
+
+            <div class="result-body">
+              <h2 id="displayName">Diagnosis</h2>
+              <p id="recommendation">Recommendation will appear here.</p>
+            </div>
+          </div>
+        </section>
+      </main>
+    </div>
+
+    <script src="{{ url_for('static', filename='app.js') }}"></script>
+  </body>
+</html>
