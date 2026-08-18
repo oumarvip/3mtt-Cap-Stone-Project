@@ -8,6 +8,7 @@ from flask_cors import CORS
 
 from . import model as model_module
 
+
 ROOT_DIR = Path(__file__).resolve().parent.parent
 
 

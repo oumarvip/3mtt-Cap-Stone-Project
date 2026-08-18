@@ -11,8 +11,8 @@ from tensorflow.keras.applications.imagenet_utils import preprocess_input
 ROOT_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 
 MODEL_FILES: Dict[str, str] = {
-    "cassava": os.path.join(ROOT_DIR, "cassava_model_finetune.keras"),  
-    "maize": os.path.join(ROOT_DIR, "maize_finetune.keras"),  
+    "cassava": os.path.join(ROOT_DIR, "models", "cassava_model_finetune.keras"),
+    "maize": os.path.join(ROOT_DIR, "models", "maize_finetune.keras"),
 }
 
 CLASS_NAMES: Dict[str, List[str]] = {
@@ -45,23 +45,54 @@ DISPLAY_NAMES: Dict[str, str] = {
 
 RECOMMENDATIONS: Dict[str, str] = {
     "Cassava___bacterial_blight": (
-        "Remove and destroy infected plants; practice crop rotation and use clean planting material."
+        "Remove and destroy infected plants; practice crop rotation "
+        "and use clean planting material."
     ),
+
     "Cassava___brown_streak_disease": (
-        "Use resistant varieties and remove infected plants; control whitefly vectors."
+        "Use resistant varieties and remove infected plants; "
+        "control whitefly vectors."
     ),
+
     "Cassava___green_mottle": (
-        "Rogue infected plants and use certified disease-free cuttings; monitor fields regularly."
+        "Rogue infected plants and use certified disease-free cuttings; "
+        "monitor fields regularly."
     ),
-    "Cassava___healthy": ("No treatment needed. Maintain good agronomic practices to prevent disease."),
+
+    "Cassava___healthy": (
+        "No treatment needed. Maintain good agronomic practices "
+        "to prevent disease."
+    ),
+
     "Cassava___mosaic_disease": (
-        "Use resistant cassava varieties (e.g., TME 419) and clear infected plants immediately to prevent whitefly transmission."
+        "Use resistant cassava varieties and remove infected plants "
+        "immediately to reduce disease spread."
     ),
-    "Blight": "Use resistant maize varieties and remove infected debris to reduce spread.",
-    "Common_Rust": "Apply fungicides early and improve air circulation where appropriate.",
-    "Gray_Leaf_Spot": "Rotate crops and remove infected residue to limit disease pressure.",
-    "Healthy": "No treatment needed. Maintain healthy field practices for maize.",
+
+        # Maize
+
+    "Blight": (
+        "Use resistant maize varieties and remove infected plant debris "
+        "to reduce disease spread."
+    ),
+
+    "Common_Rust": (
+        "Use resistant varieties and monitor the crop regularly. "
+        "Where appropriate, apply recommended fungicide treatments early."
+    ),
+
+    "Gray_Leaf_Spot": (
+        "Rotate crops, remove infected crop residue, and use resistant "
+        "maize varieties to reduce disease pressure."
+    ),
+
+    "Healthy": (
+        "No treatment needed. Continue good field management practices "
+        "and regularly monitor the crop for signs of disease."
+    ),
 }
+
+
 
 
 def _load_model(model_path: str) -> Optional[tf.keras.Model]:
