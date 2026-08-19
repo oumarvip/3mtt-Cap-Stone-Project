@@ -25,17 +25,28 @@
             </select>
           </div>
 
-          <label class="upload-box" for="imageInput">
-            <input id="imageInput" type="file" accept="image/*" />
-            <span id="uploadText">Choose an image or drag it here</span>
-          </label>
+          <div class="upload-options">
+            <label class="upload-box" for="imageInput">
+              <span class="upload-icon" aria-hidden="true">&#128193;</span>
+              <strong>Upload an image</strong>
+              <small>Choose a leaf photo from your device</small>
+              <input id="imageInput" type="file" accept="image/*" />
+            </label>
+
+            <button class="upload-box camera-box" id="cameraBtn" type="button">
+              <span class="upload-icon" aria-hidden="true">&#128247;</span>
+              <strong>Use camera</strong>
+              <small>Take a fresh photo of the leaf</small>
+            </button>
+            <input id="cameraInput" type="file" accept="image/*" capture="environment" hidden />
+          </div>
 
           <div class="preview-wrap" id="previewWrap" hidden>
             <img id="previewImage" alt="Selected leaf preview" />
           </div>
 
           <div class="actions">
-            <button id="analyzeBtn" class="primary-btn" type="button">Analyze disease</button>
+            <button id="analyzeBtn" class="primary-btn" type="button" disabled>Analyze disease</button>
             <button id="resetBtn" class="secondary-btn" type="button">Reset</button>
           </div>
         </section>
@@ -61,6 +72,25 @@
         </section>
       </main>
     </div>
+
+    <dialog id="cameraDialog" class="camera-dialog">
+      <div class="camera-dialog-content">
+        <div class="dialog-header">
+          <div>
+            <p class="eyebrow">Camera</p>
+            <h2>Take a leaf photo</h2>
+          </div>
+          <button id="closeCameraBtn" class="icon-btn" type="button" aria-label="Close camera">&times;</button>
+        </div>
+        <video id="cameraVideo" autoplay playsinline></video>
+        <p id="cameraError" class="camera-error" hidden></p>
+        <div class="dialog-actions">
+          <button id="captureBtn" class="primary-btn" type="button">Capture photo</button>
+          <button id="cancelCameraBtn" class="secondary-btn" type="button">Cancel</button>
+        </div>
+        <canvas id="cameraCanvas" hidden></canvas>
+      </div>
+    </dialog>
 
     <script src="{{ url_for('static', filename='app.js') }}"></script>
   </body>

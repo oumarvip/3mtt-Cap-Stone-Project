@@ -107,10 +107,40 @@ def _load_model(model_path: str) -> Optional[tf.keras.Model]:
         return None
 
 
-MODELS: Dict[str, Optional[tf.keras.Model]] = {
-    crop: _load_model(path) for crop, path in MODEL_FILES.items()
-}
-MODEL = MODELS.get("cassava")
+
+
+MODELS: Dict[str, Optional[tf.keras.Model]] = {}
+
+
+def get_model(crop: str) -> Optional[tf.keras.Model]:
+    """
+    Load only the requested crop model.
+
+    If another crop model is already loaded, unload it first
+    to reduce memory usage.
+    """
+    if crop not in MODEL_FILES:
+        raise ValueError(f"Unsupported crop: {crop}")
+
+    # If the requested model is already loaded, reuse it
+    if crop in MODELS and MODELS[crop] is not None:
+        return MODELS[crop]
+
+    # Remove any previously loaded model
+    MODELS.clear()
+
+    # Help Python/TensorFlow release unused memory
+    tf.keras.backend.clear_session()
+
+    # Load only the requested model
+    model = _load_model(MODEL_FILES[crop])
+
+    if model is None:
+        raise RuntimeError(f"{crop} model could not be loaded")
+
+    MODELS[crop] = model
+
+    return model
 
 
 def preprocess_image(file_stream: io.BytesIO, target_size: tuple = (224, 224)) -> np.ndarray:

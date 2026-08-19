@@ -30,9 +30,16 @@ def create_app() -> Flask:
         if crop not in model_module.MODEL_FILES:
             return jsonify({"success": False, "error": "Unsupported crop"}), 400
 
-        model = model_module.MODELS.get(crop)
-        if model is None:
-            return jsonify({"success": False, "error": f"{crop} model not loaded"}), 500
+        try:
+            model = model_module.get_model(crop)
+        except Exception as e:
+            return jsonify({
+        "success": False,
+        "error": f"{crop} model not loaded: {e}"
+    }), 500
+
+
+
 
         if "image" not in request.files:
             return jsonify({"success": False, "error": "No image file provided"}), 400
