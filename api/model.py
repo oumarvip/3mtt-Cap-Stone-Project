@@ -8,11 +8,17 @@ import tensorflow as tf
 from tensorflow.keras.models import load_model
 from tensorflow.keras.applications.imagenet_utils import preprocess_input
 
+
+
+
+
+
+
 ROOT_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 
 MODEL_FILES: Dict[str, str] = {
-    "cassava": os.path.join(ROOT_DIR, "models", "cassava_model_finetune.keras"),
-    "maize": os.path.join(ROOT_DIR, "models", "maize_finetune.keras"),
+    "cassava": os.path.join(ROOT_DIR, "models", "cassava_model.tflite"),
+    "maize": os.path.join(ROOT_DIR, "models", "maize_model.tflite"),
 }
 
 CLASS_NAMES: Dict[str, List[str]] = {
@@ -92,55 +98,71 @@ RECOMMENDATIONS: Dict[str, str] = {
     ),
 }
 
+def _load_model(model_path: str):
+    print(f"\nLoading model from:")
+    print(model_path)
 
-
-
-def _load_model(model_path: str) -> Optional[tf.keras.Model]:
     if not os.path.exists(model_path):
-        print(f"Model file not found: {model_path}")
+        print("❌ MODEL FILE DOES NOT EXIST")
         return None
+
+    print("✅ Model file exists")
+    print(f"File size: {os.path.getsize(model_path) / (1024 * 1024):.2f} MB")
+
     try:
-        from tensorflow.keras.applications.mobilenet_v2 import preprocess_input as mobilenet_preprocess
-        return load_model(model_path, custom_objects={"preprocess_input": mobilenet_preprocess})
+        interpreter = tf.lite.Interpreter(model_path=model_path)
+        interpreter.allocate_tensors()
+
+        print("✅ TFLite model loaded successfully")
+
+        print("Input details:")
+        print(interpreter.get_input_details())
+
+        print("Output details:")
+        print(interpreter.get_output_details())
+
+        return interpreter
+
     except Exception as e:
-        print(f"Failed to load model {model_path}: {e}")
+        print("❌ FAILED TO LOAD TFLITE MODEL")
+        print(type(e).__name__)
+        print(e)
+
         return None
 
 
 
 
-MODELS: Dict[str, Optional[tf.keras.Model]] = {}
 
 
-def get_model(crop: str) -> Optional[tf.keras.Model]:
+MODELS = {}
+
+
+def get_model(crop: str):
     """
-    Load only the requested crop model.
-
-    If another crop model is already loaded, unload it first
-    to reduce memory usage.
+    Load only the requested TFLite model.
     """
     if crop not in MODEL_FILES:
         raise ValueError(f"Unsupported crop: {crop}")
 
-    # If the requested model is already loaded, reuse it
+    # Reuse model if already loaded
     if crop in MODELS and MODELS[crop] is not None:
         return MODELS[crop]
 
-    # Remove any previously loaded model
+    # Remove previously loaded model
     MODELS.clear()
 
-    # Help Python/TensorFlow release unused memory
-    tf.keras.backend.clear_session()
+    # Load the requested TFLite model
+    interpreter = _load_model(MODEL_FILES[crop])
 
-    # Load only the requested model
-    model = _load_model(MODEL_FILES[crop])
-
-    if model is None:
+    if interpreter is None:
         raise RuntimeError(f"{crop} model could not be loaded")
 
-    MODELS[crop] = model
+    MODELS[crop] = interpreter
 
-    return model
+    return interpreter
+
+
 
 
 def preprocess_image(file_stream: io.BytesIO, target_size: tuple = (224, 224)) -> np.ndarray:
@@ -152,18 +174,34 @@ def preprocess_image(file_stream: io.BytesIO, target_size: tuple = (224, 224)) -
     return arr  
 
 
-def predict(model: tf.keras.Model, image_array: np.ndarray, crop: str = "cassava") -> Dict[str, object]:
-    if model is None:
-        raise ValueError(f"{crop} model is not loaded")
 
-    batch = np.expand_dims(image_array, axis=0)
-    preds = model.predict(batch)
-    probs = np.asarray(preds).squeeze()
-    idx = int(np.argmax(probs))
-    confidence = float(np.max(probs) * 100.0)
-    class_name = CLASS_NAMES[crop][idx] if idx < len(CLASS_NAMES[crop]) else "unknown"
-    return {
-        "index": idx,
-        "class_name": class_name,
-        "confidence": confidence,
-    }
+def predict(interpreter, image_array):
+    input_details = interpreter.get_input_details()
+    output_details = interpreter.get_output_details()
+
+    # Add batch dimension
+    # (224, 224, 3) -> (1, 224, 224, 3)
+    image_array = np.expand_dims(image_array, axis=0)
+    image_array = image_array.astype(np.float32)
+
+    interpreter.set_tensor(
+        input_details[0]["index"],
+        image_array
+    )
+
+    interpreter.invoke()
+
+    output = interpreter.get_tensor(
+        output_details[0]["index"]
+    )
+
+    probabilities = np.squeeze(output)
+
+    index = int(np.argmax(probabilities))
+    confidence = float(probabilities[index] * 100)
+
+    return index, confidence
+
+
+
+
