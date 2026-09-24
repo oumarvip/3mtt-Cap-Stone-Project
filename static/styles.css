@@ -41,6 +41,24 @@ input {
   padding: 24px 32px;
 }
 
+.brand-lockup {
+  width: min(1100px, 100%);
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  gap: 18px;
+}
+
+.brand-logo {
+  width: 72px;
+  height: 72px;
+  flex: 0 0 72px;
+  border: 1px solid rgba(15, 118, 110, 0.2);
+  border-radius: 14px;
+  object-fit: cover;
+  background: var(--white);
+}
+
 .eyebrow {
   margin: 0 0 8px;
   color: var(--green-700);
@@ -333,6 +351,18 @@ button:disabled {
 
   .topbar {
     padding: 20px 20px;
+  }
+
+  .brand-lockup {
+    align-items: flex-start;
+    gap: 12px;
+  }
+
+  .brand-logo {
+    width: 54px;
+    height: 54px;
+    flex-basis: 54px;
+    border-radius: 10px;
   }
 
   .panel {
